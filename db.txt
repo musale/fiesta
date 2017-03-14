@@ -1,0 +1,7 @@
+select u.username, sum(r.cost) from auth_user u join bsms_smsrecipient r on u.id=r.user_id where r.time_sent > '2017-03-14 00:00:00' and r.time_sent < '2017-03-15 00:00:00' group by u.username;
+
+select sum(cost)from bsms_smsrecipient where time_sent >= '2017-03-14 00:00:00' and time_sent <= '2017-03-15 00:00:00';
+
+
+select u.username, sum(r.cost) from auth_user u join bsms_smsrecipient r on u.id=r.user_id where r.time_sent>? and r.time_sent<? group by u.username;
+
