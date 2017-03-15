@@ -78,20 +78,3 @@ func CalcUsage() {
 
 	return
 }
-
-func createCsv(costs []CostData, loc string) {
-	file, err := os.Create(loc)
-	utils.CheckError("Cannot create file", err)
-	defer file.Close()
-
-	writer := csv.NewWriter(file)
-	err = writer.Write([]string{"USERNAME", "COST"})
-	utils.CheckError("Cannot write to file", err)
-
-	for _, cost := range costs {
-		err := writer.Write([]string{cost.Username, cost.Amount})
-		utils.CheckError("Cannot write to file", err)
-	}
-
-	defer writer.Flush()
-}

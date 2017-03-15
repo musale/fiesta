@@ -42,5 +42,9 @@ func main() {
 		log.Fatal("db ping error: ", err)
 	}
 
-	core.CalcUsage()
+	// core.CalcUsage()
+
+	http.HandleFunc("/range", core.RangePage)
+
+	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), nil))
 }
