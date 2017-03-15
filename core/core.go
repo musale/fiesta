@@ -1,11 +1,21 @@
 package core
 
 import (
-	"log"
-	"time"
-
+	"encoding/csv"
 	"github.com/etowett/fiesta/utils"
+	"log"
+	"os"
+	"time"
 )
+
+type CostData struct {
+	Username, Amount string
+}
+
+type Result struct {
+	Costs              []CostData
+	Start, Stop, Total string
+}
 
 func CalcUsage() {
 
@@ -29,22 +39,43 @@ func CalcUsage() {
 
 	defer rows.Close()
 
-	// var data []map[string]string
-
+	var costs []CostData
 	for rows.Next() {
-		// var usage map[string]string
-		var username, amount string
-		err := rows.Scan(&username, &amount)
-		if err != nil {
-			log.Println("error scan", err)
-		}
-
-		// usage["username"] = username
-		// usage["amount"] = amount
-
-		// data = append(data, usage)
-		log.Println(username, ": ", amount)
+		var usage CostData
+		err := rows.Scan(&usage.Username, &usage.Amount)
+		utils.CheckError("Error scan", err)
+		costs = append(costs, usage)
 	}
 
-	// log.Println(data)
+	createCsv(costs)
+
+	err = utils.DbCon.QueryRow("select sum(cost) as cost from bsms_smsrecipient where time_sent>=? and time_sent<=?", start, stop).Scan(&result.Total)
+
+	log.Println("Data: ", result)
+
+	subject := fmt.Sprintf("Day's stats for %v", nw.Format("2006-01-02"))
+	message := fmt.Sprintf(
+		"Hi,\nTotal Usage Today: %v\n.", total)
+	to := "etowett@focusmobile.co"
+
+	utils.SendMail(subject, message, to)
+
+	return
+}
+
+func createCsv(costs []CostData) {
+	file, err := os.Create("/tmp/data.csv")
+	utils.CheckError("Cannot create file", err)
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	err := writer.Write([]string{"USERNAME", "COST"})
+	utils.CheckError("Cannot write to file", err)
+
+	for _, cost := range costs {
+		err := writer.Write([]string{cost.Username, cost.Amount})
+		utils.CheckError("Cannot write to file", err)
+	}
+
+	defer writer.Flush()
 }
