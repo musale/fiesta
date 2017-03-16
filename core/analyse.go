@@ -10,17 +10,19 @@ import (
 	"github.com/etowett/fiesta/utils"
 )
 
-// CostData
+// CostData - structure of a cost
 type CostData struct {
 	Username string `json:"username"`
 	Amount   string `json:"amount"`
 }
 
+// UsageData - structure of a usage
 type UsageData struct {
 	Costs []CostData `json:"costs"`
 	Total string     `json:"total"`
 }
 
+// RangePage - http handler for a request to get data of a date range
 func RangePage(w http.ResponseWriter, r *http.Request) {
 	start := r.FormValue("start")
 	stop := r.FormValue("stop")
@@ -39,6 +41,7 @@ func RangePage(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(data)
 }
 
+// getUsageData - query db for the data
 func getUsageData(start, stop string) UsageData {
 
 	utils.Logger.Println("Get usage from: ", start, " to: ", stop)
@@ -89,6 +92,7 @@ func getUsageData(start, stop string) UsageData {
 	return usageData
 }
 
+// mailData - structure a mail
 func mailData(data UsageData) {
 	fileLoc := "/tmp/data.csv"
 
@@ -109,6 +113,7 @@ Sincerely.
 	return
 }
 
+// createCsv - generate a csv file from data
 func createCsv(costs []CostData, loc string) {
 	file, err := os.Create(loc)
 	utils.CheckError("Cannot create file", err)

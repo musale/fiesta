@@ -1,4 +1,5 @@
-#!/usr/bin/python2.7
+"""Mock sending a report."""
+# !/usr/bin/python2.7
 
 import urllib
 import urllib2
@@ -8,6 +9,7 @@ url = "http://127.0.0.1:8018/"
 
 
 def get_report(idx=None):
+    """Get a report."""
     st = str(datetime.now())[:10] + " 00:00:00"
     sto = str(datetime.now())[:10] + " 23:59:59"
     payload = {
