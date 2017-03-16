@@ -1,32 +1,34 @@
 package utils
 
 import (
-    "log"
-    "net/mail"
-    "net/smtp"
+	"log"
+	"net/mail"
+	"net/smtp"
 
-    "github.com/scorredoira/email"
+	"github.com/scorredoira/email"
 )
 
+// CheckError - check if return has an error
 func CheckError(message string, err error) {
-    if err != nil {
-        log.Fatal(message, err)
-    }
+	if err != nil {
+		log.Fatal(message, err)
+	}
 }
 
+// SendMail - trigger a mail to a list of emails
 func SendMail(subj, body string, dest []string, fileLoc string) {
-    // m := email.NewMessage(subl, body)
-    m := email.NewHTMLMessage(subj, body)
-    m.From = mail.Address{
-        Name: "SMSLeopard NoReply", Address: "noreply@smsleopard.com",
-    }
-    m.To = dest
+	// m := email.NewMessage(subl, body)
+	m := email.NewHTMLMessage(subj, body)
+	m.From = mail.Address{
+		Name: "SMSLeopard NoReply", Address: "noreply@smsleopard.com",
+	}
+	m.To = dest
 
-    err := m.Attach(fileLoc)
-    CheckError("Cannot attach file", err)
+	err := m.Attach(fileLoc)
+	CheckError("Cannot attach file", err)
 
-    auth := smtp.PlainAuth("", "noreply@smsleopard.com", "autocook25#", "smtp.gmail.com")
-    err = email.Send("smtp.gmail.com:587", auth, m)
-    CheckError("Cannot send mail:", err)
-    return
+	auth := smtp.PlainAuth("", "noreply@smsleopard.com", "autocook25#", "smtp.gmail.com")
+	err = email.Send("smtp.gmail.com:587", auth, m)
+	CheckError("Cannot send mail:", err)
+	return
 }
