@@ -1,0 +1,15 @@
+[Unit]
+Description=fiesta Application
+
+[Service]
+ExecStart=/apps/go/fiesta/fiesta
+
+WorkingDirectory=/apps/go/fiesta/
+
+User=focus
+Group=focus
+
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
