@@ -20,18 +20,18 @@ func main() {
 	}
 
 	// Initiate a Log file
-	// logFile, err := os.OpenFile(os.Getenv("LOG_FILE"), os.O_CREATE|os.O_RDWR|os.O_APPEND, 0600)
+	logFile, err := os.OpenFile(os.Getenv("LOG_FILE"), os.O_CREATE|os.O_RDWR|os.O_APPEND, 0600)
 
-	// if err != nil {
-	//     utils.Logger.Fatal("LogFile Error: ", err)
-	// }
+	if err != nil {
+		log.Fatal("LogFile Error: ", err)
+	}
 
-	// defer logFile.Close()
+	defer logFile.Close()
 
-	// utils.Logger = log.New(logFile, "", log.Lshortfile|log.Ldate|log.Ltime)
+	utils.Logger = log.New(logFile, "", log.Lshortfile|log.Ldate|log.Ltime)
 
 	// Mysql Connection
-	utils.DbCon, err = sql.Open("mysql", os.Getenv("DB_USER")+":"+os.Getenv("DB_PASS")+"@/"+os.Getenv("DB_NAME")+"?charset=utf8")
+	utils.DbCon, err = sql.Open("mysql", os.Getenv("DB_USER")+":"+os.Getenv("DB_PASS")+"@tcp("+os.Getenv("DB_HOST")+":3306)/"+os.Getenv("DB_NAME")+"?charset=utf8")
 	if err != nil {
 		log.Fatal("DB Error: ", err)
 	}
@@ -42,8 +42,6 @@ func main() {
 	if err != nil {
 		log.Fatal("db ping error: ", err)
 	}
-
-	// core.CalcUsage()
 
 	http.HandleFunc("/range", core.RangePage)
 

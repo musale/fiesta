@@ -4,7 +4,6 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
@@ -42,14 +41,25 @@ func RangePage(w http.ResponseWriter, r *http.Request) {
 
 func getUsageData(start, stop string) UsageData {
 
+	utils.Logger.Println("Get usage from: ", start, " to: ", stop)
+
 	var total string
+	var usageData UsageData
 
 	err := utils.DbCon.QueryRow("select sum(cost) as cost from bsms_smsrecipient where time_sent>=? and time_sent<=?", start, stop).Scan(&total)
+
+	if err != nil {
+		utils.Logger.Println("get total error: ", err)
+		return usageData
+	}
+
+	usageData.Total = total
 
 	stmt, err := utils.DbCon.Prepare("select u.username, sum(r.cost) from auth_user u join bsms_smsrecipient r on u.id=r.user_id where r.time_sent>? and r.time_sent<? group by u.username")
 
 	if err != nil {
-		log.Fatal("prepare select out", err)
+		utils.Logger.Println("slect costs error: ", err)
+		return usageData
 	}
 
 	defer stmt.Close()
@@ -57,7 +67,8 @@ func getUsageData(start, stop string) UsageData {
 	rows, err := stmt.Query(start, stop)
 
 	if err != nil {
-		log.Fatal("query select out", err)
+		utils.Logger.Println("exec costs error: ", err)
+		return usageData
 	}
 
 	defer rows.Close()
@@ -66,11 +77,16 @@ func getUsageData(start, stop string) UsageData {
 	for rows.Next() {
 		var usage CostData
 		err := rows.Scan(&usage.Username, &usage.Amount)
-		utils.CheckError("Error scan", err)
+		if err != nil {
+			utils.Logger.Println("scan costs error: ", err)
+			return usageData
+		}
 		costs = append(costs, usage)
 	}
 
-	return UsageData{Costs: costs, Total: total}
+	usageData.Costs = costs
+
+	return usageData
 }
 
 func mailData(data UsageData) {
