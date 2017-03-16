@@ -55,7 +55,7 @@ func getUsageData(start, stop string) UsageData {
 
 	usageData.Total = total
 
-	stmt, err := utils.DbCon.Prepare("select u.username, sum(r.cost) from auth_user u join bsms_smsrecipient r on u.id=r.user_id where r.time_sent>? and r.time_sent<? group by u.username")
+	stmt, err := utils.DbCon.Prepare("select u.username, sum(r.cost) as cost from auth_user u join bsms_smsrecipient r on u.id=r.user_id where r.time_sent > ? and r.time_sent < ? group by u.username order by cost desc")
 
 	if err != nil {
 		utils.Logger.Println("slect costs error: ", err)
